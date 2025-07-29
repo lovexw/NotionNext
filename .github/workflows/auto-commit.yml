@@ -1,0 +1,28 @@
+name: Auto Commit for Cloudflare Sync
+
+on:
+  schedule:
+    - cron: "0 * * * *"  # 每小时运行（0 */12 * * * 为每12小时）
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 检出代码并拉取最新内容
+      - name: Checkout and Pull
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 拉取完整历史记录
+      - name: Git config
+        run: |
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "actions@github.com"
+          git pull origin main  # 避免分支冲突
+
+      # 2. 提交空commit
+      - name: Create empty commit
+        run: |
+          git commit --allow-empty -m "定时触发更新 [skip ci]"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 自动注入的GitHub令牌
