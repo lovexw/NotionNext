@@ -1,0 +1,31 @@
+name: Auto Update Cloudflare Pages
+on:
+  schedule:
+    - cron: "0 */12 * * *"  # 每12小时触发一次
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Update timestamp in README
+        run: |
+          # 获取当前时间戳
+          TIMESTAMP=$(date)
+          # 更新README文件（如果没有README.md则创建一个）
+          echo "# Auto Updated at: $TIMESTAMP" > README.md
+          # 或者在现有README中追加时间戳
+          # echo "\nLast updated: $TIMESTAMP" >> README.md
+          
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Auto-update: $(date)"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
