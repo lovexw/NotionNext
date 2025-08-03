@@ -9,21 +9,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Update timestamp in README
+      - name: Update trigger file
         run: |
-          # 获取当前时间戳
-          TIMESTAMP=$(date)
-          # 更新README文件（如果没有README.md则创建一个）
-          echo "# Auto Updated at: $TIMESTAMP" > README.md
-          # 或者在现有README中追加时间戳
-          # echo "\nLast updated: $TIMESTAMP" >> README.md
+          # 创建或更新一个名为.deploy-trigger的文件
+          echo "Update at $(date +%s)" > .deploy-trigger
           
       - name: Commit changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Auto-update: $(date)"
+          git add .deploy-trigger
+          git commit -m "Trigger deployment: $(date)"
           
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
