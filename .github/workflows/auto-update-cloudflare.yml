@@ -1,0 +1,30 @@
+name: Auto Update Cloudflare Pages
+on:
+  schedule:
+    - cron: "0 */12 * * *"  # 每12小时触发一次（UTC时间）
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  trigger-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update trigger file
+        run: |
+          # 创建/更新触发文件，内容为当前时间戳（确保每次变更）
+          echo "Last updated at $(date -u +%Y-%m-%dT%H:%M:%SZ)" > .cloudflare-deploy-trigger
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .cloudflare-deploy-trigger
+          git commit -m "Auto trigger Cloudflare deploy: $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "No changes to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main  # 确保与你的默认分支一致（如main/master）
